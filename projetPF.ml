@@ -1,4 +1,5 @@
 
+
 (*---types---*)
 type transition = {etat_deb:string; entree:string; 
                    sortie:string; etat_fin:string}
@@ -8,10 +9,12 @@ type transducteur_fini = Transducteur of
     (string list * string list *
      string list * string list * 
      string list * transition list)
-;; 
+;;
+
 type step = {etat:string; mot_entree:string list; mot_sortie:string list}
 ;;
-    
+
+
 (*---exemple---*)
 let alphabet_entree = ["a";"b";"c"]
 ;; 
@@ -27,7 +30,9 @@ let transition1 = {etat_deb="q0"; entree="a"; sortie="AA"; etat_fin="q1"}
 ;;
 let transition2 = {etat_deb="q1"; entree="b"; sortie="BB"; etat_fin="q0"}
 ;;
-let transitions = [transition1;transition2]
+let transition3 = {etat_deb="q0"; entree="a"; sortie="A"; etat_fin="q0"}
+;;
+let transitions = [transition1;transition2;transition3]
 ;;
 let t1 = Transducteur(alphabet_entree, alphabet_sortie,
                       etats, etats_init, 
@@ -131,7 +136,7 @@ let next_step t stepbef =
     | [] -> result
     | x::r -> aux t stepbef r ({etat=x.etat_fin; 
                                 mot_entree=(reste_du_mot stepbef.mot_entree); 
-                                mot_sortie=(x.sortie::stepbef.mot_sortie)}::result)
+                                mot_sortie=(List.rev (x.sortie::stepbef.mot_sortie))}::result)
   in aux t stepbef transitions_taken []
 ;;
 let nextstep1 = next_step t1 (List.hd step_init)
@@ -153,16 +158,16 @@ let nextstep1 = next_step_plus t1 step_init
 let final_steps t mot =
   let step_init = first_steps t (string_to_list mot) in
   
-  let rec aux t steps = 
-    let ste_next = (next_step_plus t steps) in 
+  let rec aux t steps =
+    let ste_next = (next_step_plus t steps) in
     match ste_next with
-    | [] -> steps
-    | x::r -> aux t ste_next
+    | [] -> steps (* forme normale *)
+    | x::r -> (aux t [x])@(aux t r)
   in aux t step_init
 ;;
 final_steps t1 "abab"
 ;;
-final_steps t1 "abbb"
+final_steps t1 "aaabb"
 ;;
 
 (* retourne la sortie et un booléen *)(**)
@@ -172,15 +177,16 @@ let reco t mot =
   let rec aux t final_st result= 
     match final_st with
     | [] -> result
-    | x::r -> if(x.mot_entree=[]) then (list_to_string x.mot_sortie, true)::(aux t r result)
-        else (list_to_string x.mot_sortie, false)::aux t r result
+    | x::r -> (list_to_string x.mot_sortie, x.mot_entree=[])::aux t r result
   in aux t final_st []
 ;;
 
 reco t1 "abab"
 ;;
-reco t1 "abbb"
+reco t1 "aaabb"
 ;;
+
+
 
 
 
