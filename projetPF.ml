@@ -1,5 +1,4 @@
 
-
 (*---types---*)
 type transition = {etat_deb:string; entree:string; 
                    sortie:string; etat_fin:string}
@@ -65,17 +64,6 @@ let print_transitions t =
 print_transitions t1
 ;;
 
-(* transforme une chaine de caractère en string list *)(*OK*)
-(*
-  let string_to_list str =
-    let taille = String.length str in
-    let rec aux str liste pos =
-      if(pos=taille) 
-      then liste
-      else aux str ((String.sub str pos 1)::liste) (pos+1)
-    in aux str [] 0
-  ;;
-  *)
 (* transforme une chaine de caractère en string list *)(*OK*)
 let string_to_list str =
   let taille = String.length str in
