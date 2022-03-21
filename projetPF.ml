@@ -190,8 +190,7 @@ reco t1 "ababa"
 ;;
 reco t1 "aaaba"
 ;;
-reco t1 "aaabb"
-;;
+
 (* retourne les sortie par les chemin qui reconnaisent le mot en entier *)(*OK*)
 let reco_true t mot =
   let final_st = final_steps t mot in
@@ -207,9 +206,20 @@ let reco_true t mot =
 reco_true t1 "ababa"
 ;;
 reco_true t1 "aaaba"
-;;
-reco_true t1 "aaabb"
-;;
+;; 
 
-
+(* retourne vrai si (entree,sortie) appartient a la relation reconnu par le transducteur t *)(*OK*)
+let est_en_relation t entree sortie =
+  let reco_t = reco_true t entree in
+  
+  let rec aux reco_t sortie =
+    match reco_t with
+    | [] -> false
+    | x::r -> (x=sortie)||(aux r sortie)
+  in aux reco_t sortie
+;;
+est_en_relation t1 "ababa" "ABABA"
+;;
+est_en_relation t1 "ababa" "ABABa"
+;;
 
