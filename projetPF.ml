@@ -26,11 +26,11 @@ let etats_init = ["q0"]
 ;;
 let etats_finaux = ["q1"]
 ;; 
-let transition1 = {etat_deb="q0"; entree="a"; sortie="AA"; etat_fin="q1"}
+let transition1 = {etat_deb="q0"; entree="a"; sortie="A"; etat_fin="q1"}
 ;;
-let transition2 = {etat_deb="q1"; entree="b"; sortie="BB"; etat_fin="q0"}
+let transition2 = {etat_deb="q1"; entree="b"; sortie="B"; etat_fin="q0"}
 ;;
-let transition3 = {etat_deb="q0"; entree="a"; sortie="A"; etat_fin="q0"}
+let transition3 = {etat_deb="q0"; entree="a"; sortie="-"; etat_fin="q0"}
 ;;
 let transitions = [transition1;transition2;transition3]
 ;;
@@ -95,6 +95,11 @@ let get_transitions t = match t with
   | Transducteur(_,_,_,_,_,tr) -> tr
 ;;
 
+let est_final etat = 
+  List.mem etat etats_finaux
+;;
+
+
 (*---fonctions pour reconnaitre un mot---*) 
 
 (* créer la ou les premières etapes de la reconnaissance d'un mot *)(*OK*)
@@ -136,7 +141,7 @@ let next_step t stepbef =
     | [] -> result
     | x::r -> aux t stepbef r ({etat=x.etat_fin; 
                                 mot_entree=(reste_du_mot stepbef.mot_entree); 
-                                mot_sortie=(List.rev (x.sortie::stepbef.mot_sortie))}::result)
+                                mot_sortie=(x.sortie::stepbef.mot_sortie)}::result)
   in aux t stepbef transitions_taken []
 ;;
 let nextstep1 = next_step t1 (List.hd step_init)
@@ -166,27 +171,45 @@ let final_steps t mot =
   in aux t step_init
 ;;
 final_steps t1 "abab"
-;;
+;; 
 final_steps t1 "aaabb"
-;;
+;; 
 
-(* retourne la sortie et un booléen *)(**)
+(* retourne les sorties et un booléen *)(*OK*)
 let reco t mot =
   let final_st = final_steps t mot in
   
   let rec aux t final_st result= 
     match final_st with
     | [] -> result
-    | x::r -> (list_to_string x.mot_sortie, x.mot_entree=[])::aux t r result
+    | x::r -> aux t r ((list_to_string (List.rev x.mot_sortie), x.mot_entree=[]&&(est_final x.etat))::result)
   in aux t final_st []
 ;;
 
-reco t1 "abab"
+reco t1 "ababa"
+;;
+reco t1 "aaaba"
 ;;
 reco t1 "aaabb"
 ;;
-
-
+(* retourne les sortie par les chemin qui reconnaisent le mot en entier *)(*OK*)
+let reco_true t mot =
+  let final_st = final_steps t mot in
+  
+  let rec aux t final_st result= 
+    match final_st with
+    | [] -> result
+    | x::r -> aux t r (if(x.mot_entree=[]&&(est_final x.etat)) 
+                       then ((list_to_string (List.rev x.mot_sortie))::result)
+                       else result)
+  in aux t final_st []
+;;
+reco_true t1 "ababa"
+;;
+reco_true t1 "aaaba"
+;;
+reco_true t1 "aaabb"
+;;
 
 
 
