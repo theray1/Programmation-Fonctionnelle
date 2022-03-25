@@ -217,16 +217,18 @@ let a2 = ("d"::"e"::"f"::[]);;
 
 let q1 = "I";;
 let q2 = "F";;
-let q3 = "Q";;
+let q3 = "Q1";;
+let q4 = "Q2";;
 
-let q = (q1::q2::q3::[]);;
+let q = (q1::q2::q3::q4::[]);;
 let i = [q1];;
 let f = [q2];;
 
 let t1 = Transition(q1, "a", "d", q3);;
 let t2 = Transition(q3, "b", "e", q2);;
+let t3 = Transition(q2, "c", "f", q4);;
 
-let relation1 = (t1::t2::[]);;
+let relation1 = (t1::t2::t3::[]);;
 
 let fst1 = Transducteur(a1, a2, q, i ,f, relation1);;
 

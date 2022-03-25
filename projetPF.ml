@@ -66,8 +66,47 @@ let print_transitions t =
   in aux_affiche_transitions t tr_liste
 ;;
 
+
+
 print_transitions t1
 ;;
+
+let afficher_fst transducteur =
+  match transducteur with
+  |Transducteur(a1,a2,q,i,f,r) ->
+    begin
+      print_string "alphabet d'entrée :";
+      print_newline ();
+      List.map print_string a1;
+      print_newline ();
+
+      print_string "alphabet de sortie :";
+      print_newline ();
+      List.map print_string a2;
+      print_newline ();
+
+      print_string "états :";
+      print_newline ();
+      List.map print_string q;
+      print_newline ();
+      
+      print_string "états initiaux :";
+      print_newline ();
+      List.map print_string i;
+      print_newline ();
+      
+      print_string "états finaux :";
+      print_newline ();
+      List.map print_string f;
+      print_newline ();
+      
+    print_transitions transducteur;
+    end 
+  ;;
+
+let print_bool b =
+  if b then print_string "true" else print_string "false";
+  print_newline ();;
 
 (* transforme une chaine de caractère en string list *)(*OK*)
 let string_to_list str =
@@ -94,6 +133,24 @@ let etats_initiaux t = match t with
 let get_transitions t = match t with
   | Transducteur(_,_,_,_,_,tr) -> tr
 ;;
+
+let get_alphabet_entree t =
+  match t with Transducteur(x,_,_,_,_,_) -> x;;
+
+let get_alphabet_sortie t=
+  match t with Transducteur(_,x,_,_,_,_) -> x;;
+
+let get_q t =
+  match t with Transducteur(_,_,x,_,_,_) -> x;;
+
+let get_i t =
+  match t with Transducteur(_,_,_,x,_,_) -> x;;
+
+let get_f t =
+  match t with Transducteur(_,_,_,_,x,_) -> x;;
+
+let get_relation t =
+  match t with Transducteur(_,_,_,_,_,x) -> x;;
 
 (*---fonctions pour reconnaitre un mot---*) 
 
@@ -181,12 +238,100 @@ let reco t mot =
   in aux t final_st []
 ;;
 
+(* clôture transitive *)
+
+(*test l'égalité entre deux transitions r1 et r2*)
+let rec test_egalite_transition r1 r2 =
+  ((r1.etat_deb = r2.etat_deb) && (r1.entree = r2.entree) && (r1.sortie = r2.sortie) && (r1.etat_fin = r2.etat_fin))
+  ;;
+
+let rec contient_transition relation transition =
+  match relation with
+  |[] -> false
+  |t::[] -> test_egalite_transition t transition
+  |t::tl -> if (test_egalite_transition t transition) 
+            then true 
+            else (contient_transition tl transition)
+  ;;
+
+let rec supprime_doublons relation =
+
+  match relation with
+  |[] -> begin [] end
+  |t::r -> begin
+          if contient_transition r t
+          then supprime_doublons r 
+          else begin t::(supprime_doublons r) end
+        end
+        ;;
+
+(*ajout_transitivite renvoie la liste des transitions manquantes pour que obtenir la cloture transitive de la relation de transducteur*)
+let ajout_transitivite transducteur = 
+  let rel = (get_relation transducteur) in
+
+  (*retourne toutes les transitions dont l'état de départ est l'état de fin de #transition, dans #relation*)
+  let rec ajout_transitivite_depuis_une_transition transition relation =
+    match relation with
+    |[] -> [] 
+    |{etat_deb = deb1; entree = ent1; sortie = sor1; etat_fin = fin1}::r ->
+    begin
+      (*print_bool (transition.etat_deb = deb1);*)
+      if ((transition.etat_fin = deb1) && (transition.etat_deb <> deb1) && (transition.etat_fin <> fin1))
+      then {etat_deb = transition.etat_deb; entree = transition.entree^ent1; sortie = transition.sortie^sor1; etat_fin = fin1}::(ajout_transitivite_depuis_une_transition transition r) 
+      else (ajout_transitivite_depuis_une_transition transition r)
+    end
+  in
+
+  (*appelle ajout_transitive_depuis_une_transition sur toutes les transitions de #relation*)
+  let rec iteration_cloture relation_iteree relation_complete =
+    match relation_iteree with
+    |[] -> []
+    |t::r -> begin  (ajout_transitivite_depuis_une_transition t relation_complete)@(iteration_cloture r relation_complete)
+  end
+  in
+
+  let rec ajout_transitivite_aux relation =
+    
+    let rel_temp = supprime_doublons ((iteration_cloture relation relation)@relation)
+    in
+    
+    if (List.length rel_temp) = (List.length relation)
+      then begin rel_temp end
+      else begin ajout_transitivite_aux rel_temp end
+  in
+  ajout_transitivite_aux rel
+  ;;
+
+(*ajout_reflexivite renvoie la liste des transitions manquantes pour que la relation de transducteur soit reflexive*)
+let ajout_reflexivite transducteur =
+  let etats = (get_q transducteur)
+  in
+  let rec ajout_reflexivite_aux etats =
+    match etats with
+    |e::[] -> [{etat_deb = e; entree = "epsi"; sortie = "epsi"; etat_fin = e}]
+    |e::r -> {etat_deb = e; entree = "epsi"; sortie = "epsi"; etat_fin = e}::(ajout_reflexivite_aux r)
+  in
+  ajout_reflexivite_aux etats;;
+
+
+(*cloture_transitive renvoie t avec comme relation la cloture transitive de l'ancienne relation
+*)
+let cloture_transitive transducteur =
+
+    let nouvelle_relation = 
+      supprime_doublons ((get_relation transducteur)@(ajout_reflexivite transducteur)@(ajout_transitivite transducteur))
+
+    in
+    
+    match transducteur with
+    |Transducteur(alpha1, alpha2, etats, initiaux, finaux,_) -> Transducteur(alpha1, alpha2, etats, initiaux, finaux, nouvelle_relation)
+  ;;
+
 reco t1 "abab"
 ;;
 reco t1 "aaabb"
 ;;
 
 
-
-
-
+print_transitions t1;;
+print_transitions (cloture_transitive t1);;
