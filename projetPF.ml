@@ -1,6 +1,6 @@
+(*Erwan Boisteau-Desdevises, Lucas Montagnier, groupe 685K*)
 
-
-(*---types---*)
+(*---Définition des types---*)
 type transition = {etat_deb:string; entree:string; 
                    sortie:string; etat_fin:string}
 ;;
@@ -15,7 +15,8 @@ type step = {etat:string; mot_entree:string list; mot_sortie:string list}
 ;;
 
 
-(*---exemple 1---*)
+(*---Exemples---*)
+(*exemple 1*)
 let alphabet_entree = ["a";"b";"c"]
 ;; 
 let alphabet_sortie = ["A";"B";"C"]
@@ -38,7 +39,7 @@ let t1 = Transducteur(alphabet_entree, alphabet_sortie,
                       etats1, etats_init1, 
                       etats_finaux1, transitions1)
 ;;
-(*---exemple 2---*) 
+(*exemple 2*)
 let etats2 = ["q2"]
 ;;
 let etats_init2 = ["q2"]
@@ -56,7 +57,7 @@ let t2 = Transducteur(alphabet_entree, alphabet_sortie,
                       etats_finaux2, transitions2)
 ;;
 
-(*---exemple 3---*)
+(*exemple 3*)
 let alphabet_entree3 = ["A";"B";"C"]
 ;; 
 let alphabet_sortie3 = ["0";"1";"2"]
@@ -81,7 +82,7 @@ let t3 = Transducteur(alphabet_entree3, alphabet_sortie3,
                       etats_finaux3, transitions3)
 ;;
 
-(*---exemple 4---*)
+(*exemple 4*)
 let alphabet_entree4 = ["D";"E";"F"]
 ;; 
 let alphabet_sortie4 = ["D";"E";"F"]
@@ -106,9 +107,10 @@ let t4 = Transducteur(alphabet_entree4, alphabet_sortie4,
                       etats_finaux4, transitions4)
 ;;
 
-(*---fonctions utiles---*)
-(*TODO : fonction qui vérifie que les alphabets coincide avec les transitions *)
 
+(*---fonctions utiles---*)
+
+(* affiche les éléments de la liste l *)
 let rec print_string_list l =
   begin match l with
     |e::r -> print_string e; print_string_list r
@@ -117,11 +119,13 @@ let rec print_string_list l =
   print_newline ();
 ;;
 
+(* affiche la valeur d'un booléen *)
 let print_bool b =
   if b then print_string "true" else print_string "false";
-  print_newline ();;
+  print_newline ()
+;;
 
-(*OK*)
+(* affiche une transition *)
 let print_transition tr = 
   print_string tr.etat_deb;
   print_string " --- ";
@@ -132,22 +136,21 @@ let print_transition tr =
   print_string tr.etat_fin;
   print_newline ();
 ;;
-(*OK*)
-let print_transitions tra = 
-  let tr_liste = (match tra with 
+
+(* affiche toutes les transition d'un transducteur *)
+let print_transitions transducteur = 
+  let tr_liste = (match transducteur with 
       | Transducteur(_,_,_,_,_,l) -> l) in
-  let rec aux_affiche_transitions tra transitions = 
+  let rec aux_affiche_transitions transducteur transitions = 
     match transitions with
     | [] -> print_newline ()
     | x::r -> 
         begin
           print_transition x;
-          aux_affiche_transitions tra r
+          aux_affiche_transitions transducteur r
         end
-  in aux_affiche_transitions tra tr_liste
+  in aux_affiche_transitions transducteur tr_liste
 ;;
-
-
 
 print_transitions t1
 ;;
@@ -156,14 +159,17 @@ print_transitions t2
 print_transitions t3
 ;;
 
-let str_comp x y = if x > y then 1 else 0;;
-
+(* pour comparer deux alphabets *)
+let str_comp x y = if x > y then 1 else 0
+;;
 let rec test_egalite_alphabet a1 a2 =
   (List.sort str_comp a1) = (List.sort str_comp a2)
 ;;
 
-print_bool (test_egalite_alphabet (["a"; "b"; "c"]) (["c"; "b"; "a"]));;
+print_bool (test_egalite_alphabet (["a"; "b"; "c"]) (["c"; "b"; "a"]))
+;;
 
+(* affiche toutes les infos d'un transducteur *)
 let afficher_fst transducteur =
   match transducteur with
   |Transducteur(a1,a2,q,i,f,r) ->
@@ -197,7 +203,7 @@ let afficher_fst transducteur =
       end 
 ;;
 
-(* transforme une chaine de caractère en string list *)(*OK*)
+(* transforme une chaine de caractère en string list *)
 let string_to_list str =
   let taille = String.length str in
   let rec aux str pos =
@@ -208,7 +214,7 @@ let string_to_list str =
 ;;
 string_to_list "abab";;
 
-(* transforme une list de string en string *)(*OK*)
+(* transforme une list de string en string *)
 let list_to_string strlist =
   String.concat "" strlist
 ;;
@@ -234,26 +240,12 @@ let get_transitions t = match t with
   | Transducteur(_,_,_,_,_,tr) -> tr
 ;;
 
-let get_alphabet_entree t =
-  match t with Transducteur(x,_,_,_,_,_) -> x;;
-
-let get_alphabet_sortie t=
-  match t with Transducteur(_,x,_,_,_,_) -> x;;
-
-let get_q t =
-  match t with Transducteur(_,_,x,_,_,_) -> x;;
-
-let get_i t =
-  match t with Transducteur(_,_,_,x,_,_) -> x;;
-
-let get_f t =
-  match t with Transducteur(_,_,_,_,x,_) -> x;;
-
+(* test si etat appartient a la liste d'état list_etats_finaux*)
 let est_final etat list_etats_finaux = 
   List.mem etat list_etats_finaux
 ;;
 
-(* supprime les doublons dans une string list CODE MORT ?*)
+(* supprime les doublons dans une string list *)
 let suppr_doublons sl = 
   let rec aux sl result =
     match sl with
@@ -347,6 +339,7 @@ let verification_transducteur transducteur =
   && (no_doublons (etats_initiaux transducteur))
   && (no_doublons (etats_finaux transducteur))
 ;; 
+
 
 (*---fonctions pour reconnaitre un mot---*) 
 
@@ -483,6 +476,7 @@ est_en_relation t1 "ababa" "ABABA"
 est_en_relation t1 "ababa" "ABABa"
 ;;
 
+
 (*---Clôture transitive---*)
 
 (*test l'égalité entre deux transitions r1 et r2*)
@@ -552,7 +546,7 @@ let ajout_transitivite transducteur =
 
 (*ajout_reflexivite renvoie la liste des transitions manquantes pour que l'ensemble de transitions de #transducteur soit reflexif*)
 let ajout_reflexivite transducteur =
-  let etats = (get_q transducteur)
+  let etats = (get_etats transducteur)
   in
   let rec ajout_reflexivite_aux etats =
     match etats with
@@ -577,9 +571,8 @@ let cloture_transitive transducteur =
 ;;
 
 
-
-
 (*---Concatenation de transducteurs---*) 
+
 (* donne la liste des transitions partant de t1_final vers chaques états initiaux de t2 *)
 let create_transitions_1_to_few_concat t1_final t2_initiaux =
   let rec aux t1_final t2_initiaux result =
@@ -601,10 +594,9 @@ let create_transitions_concat t1_finaux t2_initiaux =
 
 (* produit un transducteur qui fait la concatenation de t1 et t2*)
 let concatenation tr1 tr2 =
-  (*TODO:vérifier que les alhabets coincident *)
-  
-  Transducteur(get_alpha_entree tr1, 
-               get_alpha_sortie tr1,
+
+  Transducteur(suppr_doublons ((get_alpha_entree tr1)@(get_alpha_entree tr2)), 
+               suppr_doublons ((get_alpha_sortie tr1)@(get_alpha_sortie tr2)),
                (get_etats tr1)@(get_etats tr2), 
                etats_initiaux tr1, 
                etats_finaux tr2, 
@@ -618,6 +610,7 @@ let concatt1t2 = concatenation t1 t2
 
 
 (*---Composition de transducteurs---*)
+
 (* a partir d'un mot execute le transducteur t1 et passe la sortie en entrée du transducteur t2 *)
 let composition mot tr1 tr2 =
   if (test_egalite_alphabet (get_alpha_sortie tr1) (get_alpha_entree tr2))
