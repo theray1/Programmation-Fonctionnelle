@@ -111,12 +111,16 @@ let t4 = Transducteur(alphabet_entree4, alphabet_sortie4,
 (*---fonctions utiles---*)
 
 (* affiche les éléments de la liste l *)
-let rec print_string_list l =
-  begin match l with
-    |e::r -> print_string e; print_string_list r
-    |[] -> print_string ""
-  end;
-  print_newline ();
+let print_string_list l =
+  print_string "[";
+  let rec aux l = 
+    begin match l with
+      |e::r -> print_string "";
+          print_string e;
+          aux r
+      |[] -> print_string "]"
+    end
+  in aux l
 ;;
 
 (* affiche la valeur d'un booléen *)
@@ -254,6 +258,28 @@ let suppr_doublons sl =
   in aux sl []
 ;;
 
+(* affiche une step *)
+let print_step stp =
+  print_string "(";
+  print_string stp.etat;
+  print_string " ; ";
+  print_string_list stp.mot_entree;
+  print_string " ; ";
+  print_string_list (List.rev stp.mot_sortie);
+  print_string ") "
+;;
+(* affiche une liste de step *)
+let print_steps l =
+  print_string "[";
+  let rec aux l = 
+    begin match l with
+      |e::r -> print_string "";
+          print_step e;
+          aux r
+      |[] -> print_string "]"
+    end
+  in aux l
+;;
 
 (*---Verification de transducteurs---*)
 
@@ -343,7 +369,7 @@ let verification_transducteur transducteur =
 
 (*---fonctions pour reconnaitre un mot---*) 
 
-(* créer la ou les premières etapes de la reconnaissance d'un mot *)(*OK*)
+(* créer la ou les premières etapes de la reconnaissance d'un mot *)
 let first_steps t mot = 
   let rec aux lei mot = 
     match lei with 
@@ -355,7 +381,7 @@ let first_steps t mot =
 let step_init = first_steps t1 (string_to_list "abab")
 ;;
 
-(* retourne les transitions qui part de l'etat q avec le symbole symb *)(*OK*)
+(* retourne les transitions qui part de l'etat q avec le symbole symb *)
 let transition_from_q transitions q symb =
   let rec aux transitions q symb result = 
     match transitions with
@@ -365,7 +391,7 @@ let transition_from_q transitions q symb =
 ;;
 
 
-(* donne le reste du mot a reconnaitre a partir d'une string list *)(*OK*)
+(* donne le reste du mot a reconnaitre a partir d'une string list *)
 let reste_du_mot m = match m with
   | [] -> failwith "Le mot est vide"
   | x::r -> r
@@ -386,7 +412,7 @@ let nextstep1 = next_step t1 (List.hd step_init)
 ;;
 
 (* donne la liste de prochaine étapes de l'évaluation d'un mot a partir de chaques étapes steps *)(*OK*)
-let next_step_plus t steps =
+let next_step_plus t steps = 
   let rec aux t steps result =
     match steps with
     | [] -> [] 
@@ -397,15 +423,16 @@ let next_step_plus t steps =
 let nextstep1 = next_step_plus t1 step_init
 ;; 
 
-(* retourne les steps finaux (i.e. les formes normales) *)(*OK*)
+(* retourne les steps finaux (i.e. les formes normales) *)
 let final_steps t mot =
   let step_init = first_steps t (string_to_list mot) in
+  print_steps step_init;
   
   let rec aux t steps =
-    let ste_next = (next_step_plus t steps) in
+    let ste_next = (next_step_plus t steps) in 
     match ste_next with
     | [] -> steps (* forme normale *)
-    | x::r -> (aux t [x])@(aux t r)
+    | x::r -> print_newline (); print_string " -> "; print_steps ste_next; (aux t [x])@(aux t r)
   in aux t step_init
 ;;
 final_steps t1 "abab"
