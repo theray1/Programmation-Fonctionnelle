@@ -397,7 +397,7 @@ let reste_du_mot m = match m with
   | x::r -> r
 ;;
 
-(* donne la liste de prochaine étapes de l'évaluation d'un mot a partir d'une étape *)(*OK*)
+(* donne la liste de prochaine étapes de l'évaluation d'un mot a partir d'une étape *)
 let next_step t stepbef = 
   let transitions_taken = transition_from_q (get_transitions t) (stepbef.etat) (List.hd stepbef.mot_entree) in
   let rec aux t stepbef transitions result =
@@ -411,7 +411,7 @@ let next_step t stepbef =
 let nextstep1 = next_step t1 (List.hd step_init)
 ;;
 
-(* donne la liste de prochaine étapes de l'évaluation d'un mot a partir de chaques étapes steps *)(*OK*)
+(* donne la liste de prochaine étapes de l'évaluation d'un mot a partir de chaques étapes steps *)
 let next_step_plus t steps = 
   let rec aux t steps result =
     match steps with
@@ -440,7 +440,7 @@ final_steps t1 "abab"
 final_steps t1 "aaabb"
 ;; 
 
-(* retourne les sorties et un booléen *)(*OK*)
+(* retourne les sorties et un booléen *)
 let reco t mot =
 
   if (verification_transducteur t) 
@@ -464,7 +464,7 @@ reco t1 "ababa"
 reco t1 "aaaba"
 ;;
 
-(* retourne les sortie par les chemin qui reconnaisent le mot en entier *)(*OK*)
+(* retourne les sortie par les chemin qui reconnaisent le mot en entier *)
 let reco_true t mot =
   
   if (verification_transducteur t) 
@@ -488,7 +488,7 @@ reco_true t1 "aaaba"
 
 (*print_transitions t1;;*)
 (*print_transitions (cloture_transitive t1);;*)
-(* retourne vrai si (entree,sortie) appartient a la relation reconnu par le transducteur t *)(*OK*)
+(* retourne vrai si (entree,sortie) appartient a la relation reconnu par le transducteur t *)
 let est_en_relation t entree sortie =
   let reco_t = reco_true t entree in
   
