@@ -423,7 +423,8 @@ let next_step_plus t steps =
 let nextstep1 = next_step_plus t1 step_init
 ;; 
 
-(* retourne les steps finaux (i.e. les formes normales) *)
+(* retourne les steps finaux (i.e. les formes normales) 
+applique plusieurs fois next_step_plus jusqu'a qu'il n'y ait plus de transitions utilisables *)
 let final_steps t mot =
   let step_init = first_steps t (string_to_list mot) in
   print_steps step_init;
@@ -440,7 +441,9 @@ final_steps t1 "abab"
 final_steps t1 "aaabb"
 ;; 
 
-(* retourne les sorties et un booléen *)
+(* retourne les sorties quand il n'y plus de transitions utilisables 
+et un booléen, vrai quand le mot entrée est reconnu en entier, faux sinon 
+si le transducteur est bien formés *)
 let reco t mot =
 
   if (verification_transducteur t) 
